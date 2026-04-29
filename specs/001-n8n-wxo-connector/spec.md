@@ -52,14 +52,31 @@ A user chooses a target agent either from an available selection list or by ente
 
 ---
 
+### User Story 4 - Diagnose failures quickly (Priority: P3)
+
+A workflow builder receives clear, structured failure details when execution cannot complete, so they can correct configuration or input and restore workflow operation quickly.
+
+**Why this priority**: Robust troubleshooting improves production reliability and user confidence, while still being secondary to core execution behavior.
+
+**Independent Test**: Can be fully tested by triggering distinct failure types (invalid credentials, invalid agent, malformed input, temporary provider failure) and confirming each output includes actionable category and guidance.
+
+**Acceptance Scenarios**:
+
+1. **Given** an authentication failure, **When** execution is attempted, **Then** the returned error clearly identifies access configuration as the root cause.
+2. **Given** a temporary provider failure or timeout, **When** execution fails, **Then** the returned error classifies it as a transient service issue and indicates that retry is appropriate.
+
+---
+
 ### Edge Cases
 
 - Input payload is empty or null.
 - Input payload exceeds expected size limits for a single request.
+- Input is provided as either a simple text payload or a structured request object.
 - Agent returns plain text or mixed content instead of structured JSON.
 - Agent returns multiple result records where one execution maps to multiple output items.
 - Response latency exceeds expected workflow timing, including timeout behavior.
 - Temporary service unavailability during execution.
+- Upstream system or provider enforces request rate limits.
 
 ## Requirements *(mandatory)*
 
@@ -70,13 +87,15 @@ A user chooses a target agent either from an available selection list or by ente
 - **FR-003**: The system MUST allow users to specify a target agent through either selection from available agents or manual identifier entry.
 - **FR-004**: The system MUST reject execution with a clear error when the specified agent cannot be resolved.
 - **FR-005**: The system MUST accept input payloads from static values and workflow expressions.
-- **FR-006**: The system MUST transform provided input into the target agent request format before execution.
-- **FR-007**: The system MUST execute the selected agent and return normalized output as one or more workflow-compatible items.
-- **FR-008**: The system MUST include in each output item: primary response content, original raw result content, and execution metadata including agent identifier and status.
-- **FR-009**: The system MUST provide structured, actionable errors for malformed input, unavailable service, and execution failures.
-- **FR-010**: The system MUST support graceful handling of non-JSON agent responses by returning usable response content and raw data.
-- **FR-011**: The system MUST preserve deterministic output structure across successful executions so downstream nodes can reliably consume results.
-- **FR-012**: The system MUST allow users to reference data from previous workflow nodes in connector input fields.
+- **FR-006**: The system MUST support both concise prompt-style input and structured request-style input, with consistent behavior for each.
+- **FR-007**: The system MUST automatically interpret the provided input form and transform it into the target agent request format before execution.
+- **FR-008**: The system MUST execute the selected agent and return normalized output as one or more workflow-compatible items.
+- **FR-009**: The system MUST include in each output item: primary response content, original raw result content, and execution metadata including agent identifier and status.
+- **FR-010**: The system MUST provide structured, actionable errors for malformed input, unavailable service, rate limiting, timeout conditions, and execution failures.
+- **FR-011**: The system MUST support graceful handling of non-JSON agent responses by returning usable response content and raw data.
+- **FR-012**: The system MUST preserve deterministic output structure across successful executions so downstream nodes can reliably consume results.
+- **FR-013**: The system MUST allow users to reference data from previous workflow nodes in connector input fields.
+- **FR-014**: The system MUST allow users to set an execution timeout limit for agent calls.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -94,6 +113,7 @@ A user chooses a target agent either from an available selection list or by ente
 - **SC-002**: 100% of failed executions return a user-actionable error category (authentication, agent resolution, input validation, or service failure).
 - **SC-003**: Users can configure the node and complete a first successful execution in under 10 minutes using only field descriptions and standard workflow knowledge.
 - **SC-004**: 100% of successful executions produce output that conforms to the documented response shape required by downstream workflow steps.
+- **SC-005**: At least 85% of sampled failure events are resolved by users without external support because returned errors identify cause and next action.
 
 ## Assumptions
 

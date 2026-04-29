@@ -31,4 +31,9 @@
 
 ## Notes
 
-- Checklist completed in one validation pass; no unresolved quality gaps detected.
+- Fresh validation pass completed after spec enhancements for input flexibility, timeout controls, and diagnostic error quality.
+- Added coverage confirmed for:
+  - dual input modes (concise prompt and structured request),
+  - timeout and rate-limit handling in requirements and edge cases,
+  - measurable troubleshooting outcome in success criteria.
+- No unresolved quality gaps detected in this pass.
