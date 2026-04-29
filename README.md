@@ -1,0 +1,2 @@
+# n8n-wxo-agent
+n8n WatsonX Orchestrate Connector A custom n8n node that enables seamless integration with IBM Watsonx Orchestrate agents. This module allows users to authenticate, select an existing agent, and execute it within n8n workflows, returning structured responses compatible with n8n’s input/output conventions. Designed to act as a lightweight bridge between workflow automation and external AI agents, with minimal configuration overhead.
