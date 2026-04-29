@@ -72,6 +72,7 @@ A workflow builder receives clear, structured failure details when execution can
 - Input payload is empty or null.
 - Input payload exceeds expected size limits for a single request.
 - Input is provided as either a simple text payload or a structured request object.
+- One item in a multi-item batch fails while others are valid.
 - Agent returns plain text or mixed content instead of structured JSON.
 - Agent returns multiple result records where one execution maps to multiple output items.
 - Response latency exceeds expected workflow timing, including timeout behavior.
@@ -96,6 +97,12 @@ A workflow builder receives clear, structured failure details when execution can
 - **FR-012**: The system MUST preserve deterministic output structure across successful executions so downstream nodes can reliably consume results.
 - **FR-013**: The system MUST allow users to reference data from previous workflow nodes in connector input fields.
 - **FR-014**: The system MUST allow users to set an execution timeout limit for agent calls.
+- **FR-015**: The system MUST treat all secret credential inputs as protected values that are never exposed in node output or logs.
+- **FR-016**: The system MUST support n8n's partial-failure execution behavior so workflows can continue when configured to proceed on item-level errors.
+- **FR-017**: The system MUST return item-level error context for failed records in multi-item executions so users can identify and correct specific bad inputs.
+- **FR-018**: The system MUST provide concise in-node guidance text for core fields (credentials, agent selection, input payload, timeout) to reduce configuration ambiguity.
+- **FR-019**: The system MUST offer an output-shaping option that lets users choose between concise output and full raw output for large provider responses.
+- **FR-020**: The node package MUST follow n8n community node distribution standards required for discoverability and verification readiness.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -114,6 +121,7 @@ A workflow builder receives clear, structured failure details when execution can
 - **SC-003**: Users can configure the node and complete a first successful execution in under 10 minutes using only field descriptions and standard workflow knowledge.
 - **SC-004**: 100% of successful executions produce output that conforms to the documented response shape required by downstream workflow steps.
 - **SC-005**: At least 85% of sampled failure events are resolved by users without external support because returned errors identify cause and next action.
+- **SC-006**: In multi-item runs where continue-on-error behavior is enabled, at least 95% of valid items still complete successfully when unrelated items fail.
 
 ## Assumptions
 

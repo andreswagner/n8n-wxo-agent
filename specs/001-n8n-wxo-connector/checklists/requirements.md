@@ -35,5 +35,9 @@
 - Added coverage confirmed for:
   - dual input modes (concise prompt and structured request),
   - timeout and rate-limit handling in requirements and edge cases,
-  - measurable troubleshooting outcome in success criteria.
+  - measurable troubleshooting outcome in success criteria,
+  - protected secret handling and non-exposure in outputs/logs,
+  - partial-failure handling with item-level error context,
+  - output shaping for large responses,
+  - community node distribution/verification readiness constraints.
 - No unresolved quality gaps detected in this pass.
