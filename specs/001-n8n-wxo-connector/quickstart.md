@@ -24,7 +24,7 @@ npm run build
 ```bash
 npm link
 # In n8n environment:
-npm link <your-package-name>
+npm link n8n-nodes-watsonx-orchestrate
 ```
 
 Restart n8n and confirm the connector appears in the node picker.

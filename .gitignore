@@ -180,3 +180,22 @@ cython_debug/
 .cursor/
 .cursorignore
 .cursorindexingignore
+
+# Node / TypeScript artifacts
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.env*
+
+# Universal
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+.vscode/
+.idea/

@@ -17,11 +17,11 @@
 
 **Purpose**: Initialize package/tooling and baseline project layout for an n8n community node.
 
-- [ ] T001 Create baseline source and test directories in `credentials/`, `nodes/WatsonxOrchestrate/`, `test/unit/`, `test/integration/`, and `test/fixtures/`
-- [ ] T002 Initialize/update package metadata, scripts, and n8n node registration in `package.json`
-- [ ] T003 Configure TypeScript build and path behavior for node sources in `tsconfig.json`
-- [ ] T004 [P] Configure Vitest for unit and integration test execution in `vitest.config.ts`
-- [ ] T005 [P] Add fixture scaffolding for provider response permutations in `test/fixtures/provider-responses.json`
+- [X] T001 Create baseline source and test directories in `credentials/`, `nodes/WatsonxOrchestrate/`, `test/unit/`, `test/integration/`, and `test/fixtures/`
+- [X] T002 Initialize/update package metadata, scripts, and n8n node registration in `package.json`
+- [X] T003 Configure TypeScript build and path behavior for node sources in `tsconfig.json`
+- [X] T004 [P] Configure Vitest for unit and integration test execution in `vitest.config.ts`
+- [X] T005 [P] Add fixture scaffolding for provider response permutations in `test/fixtures/provider-responses.json`
 
 ---
 
@@ -31,12 +31,12 @@
 
 **CRITICAL**: No user story work should begin until this phase is complete.
 
-- [ ] T006 Implement credential schema, auth injection, and credential test endpoint in `credentials/WatsonxOrchestrateApi.credentials.ts`
-- [ ] T007 [P] Implement canonical error taxonomy and n8n error mapping helpers in `nodes/WatsonxOrchestrate/errors.ts`
-- [ ] T008 [P] Implement payload normalization and response shaping primitives in `nodes/WatsonxOrchestrate/mappers.ts`
-- [ ] T009 Implement transport client using `httpRequestWithAuthentication` with timeout/retry hooks in `nodes/WatsonxOrchestrate/transport.ts`
-- [ ] T010 [P] Define shared node parameter descriptions and field guidance text in `nodes/WatsonxOrchestrate/descriptions.ts`
-- [ ] T011 Implement base node scaffold, operation routing, and item-loop execution skeleton in `nodes/WatsonxOrchestrate/WatsonxOrchestrate.node.ts`
+- [X] T006 Implement credential schema, auth injection, and credential test endpoint in `credentials/WatsonxOrchestrateApi.credentials.ts`
+- [X] T007 [P] Implement canonical error taxonomy and n8n error mapping helpers in `nodes/WatsonxOrchestrate/errors.ts`
+- [X] T008 [P] Implement payload normalization and response shaping primitives in `nodes/WatsonxOrchestrate/mappers.ts`
+- [X] T009 Implement transport client using `httpRequestWithAuthentication` with timeout/retry hooks in `nodes/WatsonxOrchestrate/transport.ts`
+- [X] T010 [P] Define shared node parameter descriptions and field guidance text in `nodes/WatsonxOrchestrate/descriptions.ts`
+- [X] T011 Implement base node scaffold, operation routing, and item-loop execution skeleton in `nodes/WatsonxOrchestrate/WatsonxOrchestrate.node.ts`
 
 **Checkpoint**: Foundation ready; user stories can now be implemented independently.
 
@@ -50,17 +50,17 @@
 
 ### Tests for User Story 1
 
-- [ ] T012 [P] [US1] Add unit tests for input normalization matrix in `test/unit/mappers.test.ts`
-- [ ] T013 [P] [US1] Add integration test for successful single-item execution in `test/integration/node-execute.test.ts`
-- [ ] T014 [P] [US1] Add integration test for successful multi-item execution in `test/integration/node-execute.test.ts`
+- [X] T012 [P] [US1] Add unit tests for input normalization matrix in `test/unit/mappers.test.ts`
+- [X] T013 [P] [US1] Add integration test for successful single-item execution in `test/integration/node-execute.test.ts`
+- [X] T014 [P] [US1] Add integration test for successful multi-item execution in `test/integration/node-execute.test.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T015 [US1] Implement canonical request builder from normalized payload to execution request contract in `nodes/WatsonxOrchestrate/mappers.ts`
-- [ ] T016 [US1] Implement execute-agent transport call and success-response normalization in `nodes/WatsonxOrchestrate/transport.ts`
-- [ ] T017 [US1] Implement node `executeAgent` operation for per-item processing and success output emission in `nodes/WatsonxOrchestrate/WatsonxOrchestrate.node.ts`
-- [ ] T018 [US1] Implement deterministic metadata population (`agentId`, `status`, `durationMs`, `requestId`) in `nodes/WatsonxOrchestrate/mappers.ts`
-- [ ] T019 [US1] Add operation and output documentation for success envelope in `README.md`
+- [X] T015 [US1] Implement canonical request builder from normalized payload to execution request contract in `nodes/WatsonxOrchestrate/mappers.ts`
+- [X] T016 [US1] Implement execute-agent transport call and success-response normalization in `nodes/WatsonxOrchestrate/transport.ts`
+- [X] T017 [US1] Implement node `executeAgent` operation for per-item processing and success output emission in `nodes/WatsonxOrchestrate/WatsonxOrchestrate.node.ts`
+- [X] T018 [US1] Implement deterministic metadata population (`agentId`, `status`, `durationMs`, `requestId`) in `nodes/WatsonxOrchestrate/mappers.ts`
+- [X] T019 [US1] Add operation and output documentation for success envelope in `README.md`
 
 **Checkpoint**: User Story 1 is independently functional and testable.
 
@@ -74,16 +74,16 @@
 
 ### Tests for User Story 2
 
-- [ ] T020 [P] [US2] Add unit tests for auth error classification and sanitization in `test/unit/errors.test.ts`
-- [ ] T021 [P] [US2] Add integration test for invalid/expired credentials failure path in `test/integration/node-execute.test.ts`
-- [ ] T022 [P] [US2] Add integration assertion that outputs/log payloads omit credential secrets in `test/integration/node-execute.test.ts`
+- [X] T020 [P] [US2] Add unit tests for auth error classification and sanitization in `test/unit/errors.test.ts`
+- [X] T021 [P] [US2] Add integration test for invalid/expired credentials failure path in `test/integration/node-execute.test.ts`
+- [X] T022 [P] [US2] Add integration assertion that outputs/log payloads omit credential secrets in `test/integration/node-execute.test.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T023 [US2] Implement credential validation and sanitized auth failure mapping in `nodes/WatsonxOrchestrate/errors.ts`
-- [ ] T024 [US2] Wire credential-test behavior and documentation URL details in `credentials/WatsonxOrchestrateApi.credentials.ts`
-- [ ] T025 [US2] Enforce secret-safe error/details shaping before node output emission in `nodes/WatsonxOrchestrate/WatsonxOrchestrate.node.ts`
-- [ ] T026 [US2] Add concise credentials and security guidance to node field descriptions in `nodes/WatsonxOrchestrate/descriptions.ts`
+- [X] T023 [US2] Implement credential validation and sanitized auth failure mapping in `nodes/WatsonxOrchestrate/errors.ts`
+- [X] T024 [US2] Wire credential-test behavior and documentation URL details in `credentials/WatsonxOrchestrateApi.credentials.ts`
+- [X] T025 [US2] Enforce secret-safe error/details shaping before node output emission in `nodes/WatsonxOrchestrate/WatsonxOrchestrate.node.ts`
+- [X] T026 [US2] Add concise credentials and security guidance to node field descriptions in `nodes/WatsonxOrchestrate/descriptions.ts`
 
 **Checkpoint**: User Stories 1 and 2 both work independently.
 
@@ -97,16 +97,16 @@
 
 ### Tests for User Story 3
 
-- [ ] T027 [P] [US3] Add integration test for dynamic agent discovery list loading in `test/integration/node-execute.test.ts`
-- [ ] T028 [P] [US3] Add integration test for manual `agentId` fallback execution in `test/integration/node-execute.test.ts`
-- [ ] T029 [P] [US3] Add integration test for unresolved/unknown agent error behavior in `test/integration/node-execute.test.ts`
+- [X] T027 [P] [US3] Add integration test for dynamic agent discovery list loading in `test/integration/node-execute.test.ts`
+- [X] T028 [P] [US3] Add integration test for manual `agentId` fallback execution in `test/integration/node-execute.test.ts`
+- [X] T029 [P] [US3] Add integration test for unresolved/unknown agent error behavior in `test/integration/node-execute.test.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T030 [US3] Implement `listAgents` transport method and normalized option mapping in `nodes/WatsonxOrchestrate/transport.ts`
-- [ ] T031 [US3] Implement agent selection mode fields and dynamic options loading in `nodes/WatsonxOrchestrate/descriptions.ts`
-- [ ] T032 [US3] Implement runtime resolution for list/manual selection modes with manual-first fallback on discovery failure in `nodes/WatsonxOrchestrate/WatsonxOrchestrate.node.ts`
-- [ ] T033 [US3] Implement agent discovery and not-found category mapping to contract error taxonomy in `nodes/WatsonxOrchestrate/errors.ts`
+- [X] T030 [US3] Implement `listAgents` transport method and normalized option mapping in `nodes/WatsonxOrchestrate/transport.ts`
+- [X] T031 [US3] Implement agent selection mode fields and dynamic options loading in `nodes/WatsonxOrchestrate/descriptions.ts`
+- [X] T032 [US3] Implement runtime resolution for list/manual selection modes with manual-first fallback on discovery failure in `nodes/WatsonxOrchestrate/WatsonxOrchestrate.node.ts`
+- [X] T033 [US3] Implement agent discovery and not-found category mapping to contract error taxonomy in `nodes/WatsonxOrchestrate/errors.ts`
 
 **Checkpoint**: User Stories 1-3 are independently functional.
 
@@ -120,17 +120,17 @@
 
 ### Tests for User Story 4
 
-- [ ] T034 [P] [US4] Add unit tests for full error-category matrix and retryable flags in `test/unit/errors.test.ts`
-- [ ] T035 [P] [US4] Add integration test for malformed input validation failure in `test/integration/node-execute.test.ts`
-- [ ] T036 [P] [US4] Add integration test for timeout and rate-limit classification in `test/integration/node-execute.test.ts`
-- [ ] T037 [P] [US4] Add integration test for multi-item continue-on-fail with `pairedItem` linkage in `test/integration/node-execute.test.ts`
+- [X] T034 [P] [US4] Add unit tests for full error-category matrix and retryable flags in `test/unit/errors.test.ts`
+- [X] T035 [P] [US4] Add integration test for malformed input validation failure in `test/integration/node-execute.test.ts`
+- [X] T036 [P] [US4] Add integration test for timeout and rate-limit classification in `test/integration/node-execute.test.ts`
+- [X] T037 [P] [US4] Add integration test for multi-item continue-on-fail with `pairedItem` linkage in `test/integration/node-execute.test.ts`
 
 ### Implementation for User Story 4
 
-- [ ] T038 [US4] Implement structured error envelope builder (`errorCategory`, `message`, `retryable`, `details`, `metadata`) in `nodes/WatsonxOrchestrate/errors.ts`
-- [ ] T039 [US4] Implement continue-on-fail item emission with `pairedItem` and per-item status handling in `nodes/WatsonxOrchestrate/WatsonxOrchestrate.node.ts`
-- [ ] T040 [US4] Implement output-shaping option (concise vs full raw output) while preserving deterministic envelope rules in `nodes/WatsonxOrchestrate/descriptions.ts`
-- [ ] T041 [US4] Implement output-shaping behavior in response mapper and node execution flow in `nodes/WatsonxOrchestrate/mappers.ts`
+- [X] T038 [US4] Implement structured error envelope builder (`errorCategory`, `message`, `retryable`, `details`, `metadata`) in `nodes/WatsonxOrchestrate/errors.ts`
+- [X] T039 [US4] Implement continue-on-fail item emission with `pairedItem` and per-item status handling in `nodes/WatsonxOrchestrate/WatsonxOrchestrate.node.ts`
+- [X] T040 [US4] Implement output-shaping option (concise vs full raw output) while preserving deterministic envelope rules in `nodes/WatsonxOrchestrate/descriptions.ts`
+- [X] T041 [US4] Implement output-shaping behavior in response mapper and node execution flow in `nodes/WatsonxOrchestrate/mappers.ts`
 
 **Checkpoint**: All user stories are independently functional and testable.
 
@@ -140,10 +140,10 @@
 
 **Purpose**: Final hardening and release-readiness tasks affecting multiple stories.
 
-- [ ] T042 [P] Finalize package discoverability/verification metadata and `n8n` export entries in `package.json`
-- [ ] T043 [P] Expand usage examples, limitations, and troubleshooting guidance in `README.md`
-- [ ] T044 Validate quickstart flow end-to-end and update any drift in `specs/001-n8n-wxo-connector/quickstart.md`
-- [ ] T045 Run package hygiene verification and update ignore/publish controls as needed in `.npmignore`
+- [X] T042 [P] Finalize package discoverability/verification metadata and `n8n` export entries in `package.json`
+- [X] T043 [P] Expand usage examples, limitations, and troubleshooting guidance in `README.md`
+- [X] T044 Validate quickstart flow end-to-end and update any drift in `specs/001-n8n-wxo-connector/quickstart.md`
+- [X] T045 Run package hygiene verification and update ignore/publish controls as needed in `.npmignore`
 
 ---
 

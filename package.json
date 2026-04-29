@@ -1,0 +1,48 @@
+{
+  "name": "n8n-nodes-watsonx-orchestrate",
+  "version": "0.1.0",
+  "description": "n8n community node for IBM Watsonx Orchestrate agent execution.",
+  "license": "MIT",
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "n8n-community-node-package",
+    "n8n-nodes-watsonx-orchestrate",
+    "watsonx",
+    "ibm",
+    "workflow-automation"
+  ],
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andreswagner/n8n-wxo-agent.git"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/WatsonxOrchestrateApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/WatsonxOrchestrate/WatsonxOrchestrate.node.js"
+    ]
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.1"
+  },
+  "dependencies": {
+    "n8n-core": "^1.93.0",
+    "n8n-workflow": "^1.93.0"
+  }
+}

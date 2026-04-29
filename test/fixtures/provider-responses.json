@@ -1,0 +1,20 @@
+{
+  "success": {
+    "requestId": "req-success-1",
+    "response": {
+      "output": "Hello from Watsonx Orchestrate"
+    }
+  },
+  "authFailure": {
+    "statusCode": 401,
+    "message": "Unauthorized"
+  },
+  "rateLimit": {
+    "statusCode": 429,
+    "message": "Too Many Requests"
+  },
+  "timeout": {
+    "code": "ETIMEDOUT",
+    "message": "Request timed out"
+  }
+}
