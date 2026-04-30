@@ -11,6 +11,7 @@ function createContext(overrides?: Partial<Record<string, unknown>>) {
     agentIdFromList: "",
     input: { prompt: "hello" },
     timeoutMs: 30000,
+    threadId: "",
     outputMode: "full",
     ...(overrides ?? {}),
   };
@@ -42,6 +43,18 @@ describe("WatsonxOrchestrate.execute", () => {
 
     expect(result[0]).toHaveLength(2);
     expect((result[0][0].json as any).metadata.status).toBe("success");
+  });
+
+  it("returns chat-friendly payload in chat output mode", async () => {
+    vi.spyOn(transportClient, "executeAgent").mockResolvedValue({ output: "hello from agent" } as IDataObject);
+    const node = new WatsonxOrchestrate();
+
+    const result = await node.execute.call(createContext({ outputMode: "chat" }) as never);
+
+    expect(result[0]).toHaveLength(2);
+    expect((result[0][0].json as any).response).toBe("hello from agent");
+    expect((result[0][0].json as any).text).toBe("hello from agent");
+    expect((result[0][0].json as any).metadata).toBeUndefined();
   });
 
   it("supports manual fallback and unknown agent failures", async () => {

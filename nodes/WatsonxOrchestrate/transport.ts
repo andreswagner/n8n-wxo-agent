@@ -79,6 +79,7 @@ export const transportClient: TransportClient = {
           timeout: request.timeoutMs,
           headers: {
             "x-request-id": request.requestId ?? "",
+            ...(request.threadId ? { "X-IBM-THREAD-ID": request.threadId } : {}),
           },
         },
       );

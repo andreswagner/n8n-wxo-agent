@@ -8,9 +8,11 @@ Custom n8n community node for executing IBM Watsonx Orchestrate agents from work
 
 - Secure credentials with n8n credential store (`token`, `baseUrl`, `environment`; API key or IAM access token)
 - Agent execution with list/manual selection modes
+- Optional thread continuity via `X-IBM-THREAD-ID` (maps from chat `sessionId`)
 - Deterministic output envelope: `response`, `raw`, `metadata`
+- Chat-friendly mode that emits plain `text`/`response` fields
 - Structured error taxonomy with continue-on-fail support
-- Output shaping mode (`full` or `concise`)
+- Output shaping mode (`chat`, `full`, or `concise`)
 
 ## Output Contract
 
@@ -47,7 +49,7 @@ Copy `access_token` from the JSON into the credential **Token** field (no `Beare
 1. Configure `Watsonx Orchestrate API` credentials.
 2. Add the `Watsonx Orchestrate` node to your workflow.
 3. Select `Execute Agent`, choose list/manual agent targeting, provide input.
-4. Execute and consume `response` + `metadata` downstream.
+4. For chat flows, keep **Output Mode = Chat (text output)** and map the chat response text to `{{$json.text}}` (or `{{$json.response}}`).
 
 ## Development
 
@@ -66,4 +68,4 @@ Use this when n8n shows **“Couldn’t connect with these settings”** and you
 
 The script exchanges the API key at IBM IAM, then calls `GET {WXO_BASE_URL}{WXO_LIVE_PATH}` (default **`WXO_LIVE_PATH=/v1/orchestrate/agents`**) with `Authorization: Bearer <access_token>`, matching the credential **Test** and the same routes as [`@andreswagner/node-red-contrib-wxo-agent`](https://www.npmjs.com/package/@andreswagner/node-red-contrib-wxo-agent). **`WXO_BASE_URL`** must be the **Service instance URL** (`https://<host>/instances/<tenant_id>`). **`npm test`** does not use `.env` for network calls (live tests are excluded).
 
-For **n8n**, put the IAM **`access_token`** from the curl exchange (or equivalent) into the **Token** field unless you rely on another documented Bearer format. This package does not run the IAM exchange inside n8n yet; `npm run test:live` does it only for local CLI checks.
+For **n8n**, the credential **Token** field accepts either an IAM API key or an IAM `access_token` JWT. If you paste an API key, this package exchanges it via IAM before requests.

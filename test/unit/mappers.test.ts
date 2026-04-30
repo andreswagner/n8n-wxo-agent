@@ -53,8 +53,15 @@ describe("mappers", () => {
       durationMs: 5,
       outputMode: "concise",
     });
+    const chat = shapeSuccess({
+      raw: { output: "ok" },
+      agentId: "agent-1",
+      durationMs: 5,
+      outputMode: "chat",
+    });
 
     expect(full.raw).toEqual({ output: "ok" });
     expect(concise.raw).toBeNull();
+    expect(chat.raw).toBeNull();
   });
 });

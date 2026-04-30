@@ -22,10 +22,11 @@ export async function executeSingleItem(params: {
   context: IExecuteFunctions;
   itemIndex: number;
   resolvedAgentId: string;
-  outputMode: "full" | "concise";
+  outputMode: "full" | "concise" | "chat";
 }): Promise<INodeExecutionData> {
   const input = params.context.getNodeParameter("input", params.itemIndex, null) as unknown;
   const timeoutMs = params.context.getNodeParameter("timeoutMs", params.itemIndex, 30000) as number;
+  const threadIdRaw = params.context.getNodeParameter("threadId", params.itemIndex, "") as string;
   const requestId = `wxo-${Date.now()}-${params.itemIndex}`;
   const started = Date.now();
 
@@ -35,6 +36,7 @@ export async function executeSingleItem(params: {
     normalized,
     timeoutMs,
     requestId,
+    threadId: threadIdRaw,
   });
 
   const raw = await transportClient.executeAgent(params.context, request);
@@ -47,6 +49,17 @@ export async function executeSingleItem(params: {
     requestId,
     outputMode: params.outputMode,
   });
+
+  if (params.outputMode === "chat") {
+    const chatResponse = envelope.response;
+    const text = typeof chatResponse === "string" ? chatResponse : JSON.stringify(chatResponse ?? "");
+    return {
+      json: {
+        response: chatResponse,
+        text,
+      } as IDataObject,
+    };
+  }
 
   return {
     json: envelope as unknown as IDataObject,
@@ -101,7 +114,7 @@ export class WatsonxOrchestrate implements INodeType {
       throw new NodeOperationError(this.getNode(), `Unsupported operation: ${operation}`);
     }
 
-    const outputMode = this.getNodeParameter("outputMode", 0, "full") as "full" | "concise";
+    const outputMode = this.getNodeParameter("outputMode", 0, "full") as "full" | "concise" | "chat";
     const continueOnFail = this.continueOnFail();
     const returnData: INodeExecutionData[] = [];
 

@@ -14,6 +14,7 @@ export interface ExecutionRequest {
   payload: IDataObject;
   timeoutMs: number;
   requestId?: string;
+  threadId?: string;
 }
 
 export interface ExecutionSuccessEnvelope {
@@ -82,6 +83,7 @@ export function buildExecutionRequest(params: {
   normalized: NormalizedInput;
   timeoutMs: number;
   requestId?: string;
+  threadId?: string;
 }): ExecutionRequest {
   if (!params.agentId?.trim()) {
     throw buildStructuredError({
@@ -108,6 +110,7 @@ export function buildExecutionRequest(params: {
     },
     timeoutMs,
     requestId: params.requestId,
+    threadId: params.threadId?.trim() || undefined,
   };
 }
 
@@ -140,11 +143,11 @@ export function shapeSuccess(params: {
   agentId: string;
   durationMs: number;
   requestId?: string;
-  outputMode?: "concise" | "full";
+  outputMode?: "concise" | "full" | "chat";
 }): ExecutionSuccessEnvelope {
   return {
     response: pickResponse(params.raw),
-    raw: params.outputMode === "concise" ? null : params.raw,
+    raw: params.outputMode === "full" ? params.raw : null,
     metadata: {
       agentId: params.agentId,
       status: "success",

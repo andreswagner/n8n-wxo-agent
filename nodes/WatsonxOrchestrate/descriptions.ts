@@ -84,15 +84,29 @@ export const nodeProperties: INodeProperties[] = [
     },
   },
   {
+    displayName: "Thread ID",
+    name: "threadId",
+    type: "string",
+    default: "={{$json.sessionId || ''}}",
+    description:
+      "Conversation/thread identifier sent as `X-IBM-THREAD-ID`. Defaults to incoming `sessionId` so n8n chat sessions map to watsonx Orchestrate threads.",
+    displayOptions: {
+      show: {
+        operation: ["executeAgent"],
+      },
+    },
+  },
+  {
     displayName: "Output Mode",
     name: "outputMode",
     type: "options",
-    default: "full",
+    default: "chat",
     options: [
       { name: "Full (response + raw)", value: "full" },
       { name: "Concise (response only)", value: "concise" },
+      { name: "Chat (text output)", value: "chat" },
     ],
-    description: "Choose whether to include full raw upstream payload",
+    description: "Choose envelope output or chat-friendly text output",
     displayOptions: {
       show: {
         operation: ["executeAgent"],
