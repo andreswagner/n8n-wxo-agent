@@ -27,7 +27,9 @@ export async function executeSingleItem(params: {
   const input = params.context.getNodeParameter("input", params.itemIndex, null) as unknown;
   const timeoutMs = params.context.getNodeParameter("timeoutMs", params.itemIndex, 30000) as number;
   const threadIdRaw = params.context.getNodeParameter("threadId", params.itemIndex, "") as string;
-  const effectiveThreadId = String(threadIdRaw ?? "").trim();
+  const itemJson = (params.context.getInputData()[params.itemIndex]?.json ?? {}) as IDataObject;
+  const sessionIdFallback = String(itemJson.sessionId ?? "").trim();
+  const effectiveThreadId = String(threadIdRaw ?? "").trim() || sessionIdFallback;
   const requestId = `wxo-${Date.now()}-${params.itemIndex}`;
   const started = Date.now();
 

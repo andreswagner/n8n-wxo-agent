@@ -61,6 +61,17 @@ describe("WatsonxOrchestrate.execute", () => {
     expect((result[0][0].json as any).metadata).toBeUndefined();
   });
 
+  it("falls back to incoming json.sessionId when threadId param is empty", async () => {
+    vi.spyOn(transportClient, "executeAgent").mockResolvedValue({ output: "ok" } as IDataObject);
+    const node = new WatsonxOrchestrate();
+    const context = createContext({ threadId: "", outputMode: "chat" }) as Record<string, unknown>;
+    context.getInputData = () => [{ json: { sessionId: "session-from-item" } }];
+
+    const result = await node.execute.call(context as never);
+
+    expect(result[0][0].json.threadId).toBe("session-from-item");
+  });
+
   it("supports manual fallback and unknown agent failures", async () => {
     vi.spyOn(transportClient, "executeAgent").mockRejectedValue(new Error("not found"));
     const node = new WatsonxOrchestrate();
