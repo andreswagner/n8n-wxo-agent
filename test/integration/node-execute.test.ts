@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { IDataObject } from "n8n-workflow";
-import { WatsonxOrchestrate } from "../../nodes/WatsonxOrchestrate/WatsonxOrchestrate.node";
+import { resetSessionThreadMapForTests, WatsonxOrchestrate } from "../../nodes/WatsonxOrchestrate/WatsonxOrchestrate.node";
 import { transportClient } from "../../nodes/WatsonxOrchestrate/transport";
 
 function createContext(overrides?: Partial<Record<string, unknown>>) {
@@ -33,6 +33,7 @@ function createContext(overrides?: Partial<Record<string, unknown>>) {
 describe("WatsonxOrchestrate.execute", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    resetSessionThreadMapForTests();
   });
 
   it("executes successful single and multi item runs", async () => {
@@ -60,21 +61,24 @@ describe("WatsonxOrchestrate.execute", () => {
     expect((result[0][0].json as any).response).toBe("hello from agent");
     expect((result[0][0].json as any).text).toBe("hello from agent");
     expect((result[0][0].json as any).threadId).toBe("thread-from-provider");
-    expect((result[0][0].json as any).sessionId).toBe("session-42");
+    expect((result[0][0].json as any).sessionId).toBeNull();
     expect((result[0][0].json as any).sentThreadId).toBe("session-42");
     expect((result[0][0].json as any).requestId).toMatch(/^wxo-/);
     expect((result[0][0].json as any).metadata).toBeUndefined();
   });
 
-  it("falls back to incoming json.sessionId when threadId param is empty", async () => {
-    vi.spyOn(transportClient, "executeAgent").mockResolvedValue({ output: "ok" } as IDataObject);
+  it("creates session mapping on first provider response", async () => {
+    const executeSpy = vi.spyOn(transportClient, "executeAgent")
+      .mockResolvedValue({ output: "ok", thread_id: "provider-thread-1" } as IDataObject);
     const node = new WatsonxOrchestrate();
     const context = createContext({ threadId: "", outputMode: "chat" }) as Record<string, unknown>;
     context.getInputData = () => [{ json: { sessionId: "session-from-item" } }];
 
     const result = await node.execute.call(context as never);
 
-    expect(result[0][0].json.threadId).toBe("session-from-item");
+    expect(executeSpy.mock.calls[0][1].threadId).toBeUndefined();
+    expect(result[0][0].json.threadId).toBe("provider-thread-1");
+    expect(result[0][0].json.sessionId).toBe("session-from-item");
   });
 
   it("uses input.thread_id when threadId param is empty", async () => {
@@ -92,7 +96,7 @@ describe("WatsonxOrchestrate.execute", () => {
     expect(result[0][0].json.threadId).toBe("thread-from-input");
   });
 
-  it("keeps outgoing thread id stable across turns for same sessionId", async () => {
+  it("uses mapped provider thread id for subsequent messages", async () => {
     const executeSpy = vi.spyOn(transportClient, "executeAgent")
       .mockResolvedValueOnce({ output: "first", thread_id: "provider-thread-a" } as IDataObject)
       .mockResolvedValueOnce({ output: "second", thread_id: "provider-thread-b" } as IDataObject);
@@ -107,26 +111,10 @@ describe("WatsonxOrchestrate.execute", () => {
     const result = await node.execute.call(context as never);
 
     expect(executeSpy).toHaveBeenCalledTimes(2);
-    expect(executeSpy.mock.calls[0][1].threadId).toBe("stable-session");
-    expect(executeSpy.mock.calls[1][1].threadId).toBe("stable-session");
+    expect(executeSpy.mock.calls[0][1].threadId).toBeUndefined();
+    expect(executeSpy.mock.calls[1][1].threadId).toBe("provider-thread-a");
     expect((result[0][0].json as any).sessionId).toBe("stable-session");
     expect((result[0][1].json as any).sessionId).toBe("stable-session");
-  });
-
-  it("normalizes 32-hex sessionId to dashed UUID thread_id", async () => {
-    const executeSpy = vi.spyOn(transportClient, "executeAgent")
-      .mockResolvedValue({ output: "ok" } as IDataObject);
-    const node = new WatsonxOrchestrate();
-    const context = createContext({ threadId: "", outputMode: "chat" }) as Record<string, unknown>;
-    context.getInputData = () => [{ json: { sessionId: "818ac1a720ca45d5abf6e5bde04641de" } }];
-
-    const result = await node.execute.call(context as never);
-    const expected = "818ac1a7-20ca-45d5-abf6-e5bde04641de";
-
-    expect(executeSpy).toHaveBeenCalledTimes(1);
-    expect(executeSpy.mock.calls[0][1].threadId).toBe(expected);
-    expect((result[0][0].json as any).sessionId).toBe(expected);
-    expect((result[0][0].json as any).sentThreadId).toBe(expected);
   });
 
   it("supports manual fallback and unknown agent failures", async () => {

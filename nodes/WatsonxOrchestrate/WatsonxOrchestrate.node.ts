@@ -18,6 +18,12 @@ import { buildExecutionRequest, normalizeInput, shapeContinueOnFail, shapeSucces
 import { nodeProperties } from "./descriptions";
 import { transportClient } from "./transport";
 
+const sessionToThreadId = new Map<string, string>();
+
+export function resetSessionThreadMapForTests(): void {
+  sessionToThreadId.clear();
+}
+
 export async function executeSingleItem(params: {
   context: IExecuteFunctions;
   itemIndex: number;
@@ -30,8 +36,9 @@ export async function executeSingleItem(params: {
   const itemJson = (params.context.getInputData()[params.itemIndex]?.json ?? {}) as IDataObject;
   const payloadThreadId = readInputThreadId(input);
   const sessionIdFallback = String(itemJson.sessionId ?? "").trim();
-  const rawThreadId = String(threadIdRaw ?? "").trim() || payloadThreadId || sessionIdFallback;
-  const effectiveThreadId = normalizeThreadId(rawThreadId);
+  const explicitThreadId = String(threadIdRaw ?? "").trim() || payloadThreadId;
+  const mappedThreadId = sessionIdFallback ? sessionToThreadId.get(sessionIdFallback) : undefined;
+  const effectiveThreadId = explicitThreadId || mappedThreadId;
   const requestId = `wxo-${Date.now()}-${params.itemIndex}`;
   const started = Date.now();
 
@@ -46,6 +53,9 @@ export async function executeSingleItem(params: {
 
   const raw = await transportClient.executeAgent(params.context, request);
   const responseThreadId = readResponseThreadId(raw) ?? request.threadId;
+  if (sessionIdFallback && responseThreadId && !sessionToThreadId.has(sessionIdFallback)) {
+    sessionToThreadId.set(sessionIdFallback, responseThreadId);
+  }
   const durationMs = Date.now() - started;
 
   const envelope = shapeSuccess({
@@ -65,7 +75,7 @@ export async function executeSingleItem(params: {
         response: chatResponse,
         text,
         threadId: responseThreadId ?? null,
-        sessionId: request.threadId ?? null,
+        sessionId: sessionIdFallback || null,
         sentThreadId: request.threadId ?? null,
         requestId,
       } as IDataObject,
@@ -97,18 +107,6 @@ function readResponseThreadId(raw: unknown): string | undefined {
   }
   const t = candidate.trim();
   return t.length > 0 ? t : undefined;
-}
-
-/**
- * Watsonx thread IDs are usually UUIDs with dashes.
- * n8n chat sessionId often arrives as 32-hex (UUID without dashes), so normalize it.
- */
-function normalizeThreadId(value: string): string {
-  const t = value.trim();
-  const hex32 = /^[0-9a-fA-F]{32}$/;
-  if (!hex32.test(t)) return t;
-  const lower = t.toLowerCase();
-  return `${lower.slice(0, 8)}-${lower.slice(8, 12)}-${lower.slice(12, 16)}-${lower.slice(16, 20)}-${lower.slice(20)}`;
 }
 
 export class WatsonxOrchestrate implements INodeType {

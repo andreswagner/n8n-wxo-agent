@@ -131,6 +131,9 @@
 - [X] T039 [US4] Implement continue-on-fail item emission with `pairedItem` and per-item status handling in `nodes/WatsonxOrchestrate/WatsonxOrchestrate.node.ts`
 - [X] T040 [US4] Implement output-shaping option (concise vs full raw output) while preserving deterministic envelope rules in `nodes/WatsonxOrchestrate/descriptions.ts`
 - [X] T041 [US4] Implement output-shaping behavior in response mapper and node execution flow in `nodes/WatsonxOrchestrate/mappers.ts`
+- [X] T046 [US4] Implement internal `sessionId -> thread_id` mapping lifecycle (first call without thread header, persist provider thread, reuse on subsequent calls) in `nodes/WatsonxOrchestrate/WatsonxOrchestrate.node.ts`
+- [X] T047 [US4] Enforce provider thread continuity transport contract using `X-IBM-THREAD-ID` in `nodes/WatsonxOrchestrate/transport.ts`
+- [X] T048 [US4] Add regression tests for session-thread mapping bootstrap/reuse behavior in `test/integration/node-execute.test.ts`
 
 **Checkpoint**: All user stories are independently functional and testable.
 

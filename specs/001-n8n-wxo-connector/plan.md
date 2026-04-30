@@ -5,13 +5,13 @@
 
 ## Summary
 
-Build a production-ready custom n8n connector node that authenticates against IBM Watsonx Orchestrate, supports agent selection (discovery and manual ID), executes synchronous agent calls from workflow input, and returns deterministic structured outputs plus actionable error taxonomy. The implementation uses an n8n-native split (credentials + node + API client + mappers), with strict input normalization, output contracts, and test coverage for happy-path and failure-path behavior.
+Build a production-ready custom n8n connector node that authenticates against IBM Watsonx Orchestrate, supports agent selection (discovery and manual ID), executes synchronous agent calls from workflow input, and returns deterministic structured outputs plus actionable error taxonomy. The implementation uses an n8n-native split (credentials + node + API client + mappers), with strict input normalization, output contracts, and test coverage for happy-path and failure-path behavior. Multi-turn continuity is implemented through internal `sessionId -> thread_id` mapping and `X-IBM-THREAD-ID` request headers.
 
 ## Technical Context
 
 **Language/Version**: TypeScript 5.x on Node.js 20 LTS  
 **Primary Dependencies**: `n8n-workflow` ^2.x (peer at runtime from n8n 2.x host), TypeScript, Vitest; optional `@n8n/node-cli` for scaffolding; built-in `helpers.httpRequestWithAuthentication` for transport  
-**Storage**: N/A (stateless runtime; secrets only in n8n credential store)  
+**Storage**: In-process key/value map for `sessionId -> thread_id` continuity (plus n8n credential store for secrets)  
 **Testing**: Vitest (unit), n8n execution harness + mocked HTTP for integration  
 **Target Platform**: n8n self-hosted and n8n-compatible runtime on Linux/macOS containers  
 **Project Type**: n8n community node package/library  
@@ -26,6 +26,7 @@ Build a production-ready custom n8n connector node that authenticates against IB
 3. **Base URL Handling**: Preserve instance path segments when constructing endpoint URLs (avoid join logic that drops nested base paths).
 4. **Dynamic Agent Discovery Resilience**: Agent list loading failures must not block execution; manual `agentId` input remains available as a first-class fallback.
 5. **Output Contract Stability**: The `response`/`raw`/`metadata` envelope must remain deterministic across equivalent outcomes to protect downstream workflow compatibility.
+6. **Session/Thread Continuity**: `sessionId` is not directly treated as provider `thread_id`; instead, the connector must map `sessionId` to provider-issued `thread_id` after first response and reuse it on subsequent calls.
 
 ## n8n Community Node Best Practices to Apply
 

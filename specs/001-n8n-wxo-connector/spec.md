@@ -103,6 +103,10 @@ A workflow builder receives clear, structured failure details when execution can
 - **FR-018**: The system MUST provide concise in-node guidance text for core fields (credentials, agent selection, input payload, timeout) to reduce configuration ambiguity.
 - **FR-019**: The system MUST offer an output-shaping option that lets users choose between concise output and full raw output for large provider responses.
 - **FR-020**: The node package MUST follow n8n community node distribution standards required for discoverability and verification readiness.
+- **FR-021**: The system MUST maintain a session-to-thread mapping where workflow `sessionId` is the key and provider `thread_id` is the value.
+- **FR-022**: When no mapping exists for a `sessionId`, the system MUST execute the first request without `X-IBM-THREAD-ID`, then persist the returned `thread_id` for that `sessionId`.
+- **FR-023**: When a mapping exists for a `sessionId`, the system MUST send the mapped provider `thread_id` via `X-IBM-THREAD-ID` for subsequent requests.
+- **FR-024**: The system MUST expose both the provider `thread_id` and the workflow `sessionId` in chat-mode outputs so users can diagnose conversation continuity behavior.
 
 ### Key Entities *(include if feature involves data)*
 
