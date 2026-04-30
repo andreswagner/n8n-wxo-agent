@@ -1,9 +1,17 @@
 import type {
   IAuthenticateGeneric,
+  ICredentialDataDecryptedObject,
   ICredentialTestRequest,
   ICredentialType,
+  IDataObject,
+  IHttpRequestHelper,
   INodeProperties,
 } from "n8n-workflow";
+import {
+  exchangeApiKeyForIamAccessToken,
+  isLikelyIamAccessToken,
+  normalizeTokenSecret,
+} from "./ibm-iam";
 
 export class WatsonxOrchestrateApi implements ICredentialType {
   name = "watsonxOrchestrateApi";
@@ -35,13 +43,18 @@ export class WatsonxOrchestrateApi implements ICredentialType {
       default: "",
       required: true,
       description:
-        "IBM Cloud IAM **access token** (recommended): paste the `access_token` value only—no `Bearer ` prefix. "
-        + "IBM documents that watsonx Orchestrate on IBM Cloud accepts an IAM API key or an IAM access token; "
-        + "this field must be whatever you send after `Bearer ` (most teams use the access token from IAM). "
-        + "To create a token from an API key, call IAM Identity Services: POST `https://iam.cloud.ibm.com/identity/token` "
-        + "with `Content-Type: application/x-www-form-urlencoded` and body "
-        + "`grant_type=urn:ibm:params:oauth:grant-type:apikey&apikey=YOUR_APIKEY`, then paste the JSON `access_token`. "
-        + "Tokens expire (often ~1 hour); refresh by repeating the exchange or use `ibmcloud iam oauth-tokens` after login.",
+        "IBM Cloud IAM **API key** or **access_token** (paste either—no `Bearer ` prefix). "
+        + "If you paste an API key, n8n exchanges it for an IAM access token before each request (same as IBM’s "
+        + "`grant_type=urn:ibm:params:oauth:grant-type:apikey` flow). "
+        + "If you paste an access token (a JWT), it is sent as-is. "
+        + "Access tokens expire (often ~1 hour); use an API key for hands-off refresh, or repeat the IAM exchange / "
+        + "`ibmcloud iam oauth-tokens` and paste a new token.",
+    },
+    {
+      displayName: "Resolved Access Token",
+      name: "resolvedAccessToken",
+      type: "hidden",
+      default: "",
     },
     {
       displayName: "Environment",
@@ -60,10 +73,25 @@ export class WatsonxOrchestrateApi implements ICredentialType {
     type: "generic",
     properties: {
       headers: {
-        Authorization: "=Bearer {{$credentials.token}}",
+        Authorization: "=Bearer {{$credentials.resolvedAccessToken}}",
       },
     },
   };
+
+  async preAuthentication(
+    this: IHttpRequestHelper,
+    credentials: ICredentialDataDecryptedObject,
+  ): Promise<IDataObject> {
+    const raw = normalizeTokenSecret(credentials.token);
+    if (!raw) {
+      return {};
+    }
+    if (isLikelyIamAccessToken(raw)) {
+      return { resolvedAccessToken: raw };
+    }
+    const accessToken = await exchangeApiKeyForIamAccessToken(this.helpers.httpRequest, raw);
+    return { resolvedAccessToken: accessToken };
+  }
 
   test: ICredentialTestRequest = {
     request: {

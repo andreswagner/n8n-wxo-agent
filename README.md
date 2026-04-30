@@ -6,7 +6,7 @@ Custom n8n community node for executing IBM Watsonx Orchestrate agents from work
 
 ## Features
 
-- Secure credentials with n8n credential store (`token`, `baseUrl`, `environment`)
+- Secure credentials with n8n credential store (`token`, `baseUrl`, `environment`; API key or IAM access token)
 - Agent execution with list/manual selection modes
 - Deterministic output envelope: `response`, `raw`, `metadata`
 - Structured error taxonomy with continue-on-fail support
@@ -28,9 +28,9 @@ Failed items with continue-on-fail enabled return:
 
 ## Authentication (IBM Cloud)
 
-watsonx Orchestrate on **IBM Cloud** can be authorized with an **IAM API key** or an **IAM access token** (see IBM: *Generating the access token for the IBM Cloud offering*). This node sends `Authorization: Bearer <credential Token>`.
+watsonx Orchestrate on **IBM Cloud** can be authorized with an **IAM API key** or an **IAM access token** (see IBM: *Generating the access token for the IBM Cloud offering*). The credential’s **Token** field accepts either: if you paste an **API key**, n8n exchanges it for an IAM access token before requests; if you paste a **JWT** (`access_token`), it is sent as `Authorization: Bearer …` directly.
 
-- **Recommended for this credential:** store the **`access_token`** from IAM (a JWT), not the API key string. Obtain it by exchanging your API key:
+- **Manual token (optional):** you can still paste only the **`access_token`** from IAM. Obtain it by exchanging your API key:
 
 ```bash
 curl -X POST 'https://iam.cloud.ibm.com/identity/token' \
