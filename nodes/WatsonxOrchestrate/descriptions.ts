@@ -84,12 +84,12 @@ export const nodeProperties: INodeProperties[] = [
     },
   },
   {
-    displayName: "Session ID",
+    displayName: "Conversation Context Key",
     name: "sessionId",
     type: "string",
     default: "={{$json.sessionId || ''}}",
     description:
-      "Stable conversation key used for internal `sessionId -> thread_id` mapping. First message starts without thread header; later messages reuse the mapped provider thread via `X-IBM-THREAD-ID`.",
+      "Stable business key used to keep conversation continuity, bind requests to the same assistant behavior, and preserve context across messages (for example: session, customer, or case ID).",
     displayOptions: {
       show: {
         operation: ["executeAgent"],

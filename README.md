@@ -8,7 +8,7 @@ Custom n8n community node for executing IBM Watsonx Orchestrate agents from work
 
 - Secure credentials with n8n credential store (`token`, `baseUrl`, `environment`; API key or IAM access token)
 - Agent execution with list/manual selection modes
-- Optional thread continuity via `X-IBM-THREAD-ID` (maps from chat `sessionId`)
+- Optional thread continuity via `X-IBM-THREAD-ID` (derived from Conversation Context Key)
 - Deterministic output envelope: `response`, `raw`, `metadata`
 - Chat-friendly mode that emits plain `text`/`response` fields
 - Structured error taxonomy with continue-on-fail support
@@ -49,7 +49,8 @@ Copy `access_token` from the JSON into the credential **Token** field (no `Beare
 1. Configure `Watsonx Orchestrate API` credentials.
 2. Add the `Watsonx Orchestrate` node to your workflow.
 3. Select `Execute Agent`, choose list/manual agent targeting, provide input.
-4. For chat flows, keep **Output Mode = Chat (text output)** and map the chat response text to `{{$json.text}}` (or `{{$json.response}}`).
+4. (Optional) Set **Conversation Context Key** to a stable business ID (for example `sessionId`, customer ID, or case ID) to keep continuity across turns.
+5. For chat flows, keep **Output Mode = Chat (text output)** and map the chat response text to `{{$json.text}}` (or `{{$json.response}}`).
 
 ## Development
 
