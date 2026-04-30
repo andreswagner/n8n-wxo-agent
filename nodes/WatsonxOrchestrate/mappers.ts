@@ -25,6 +25,7 @@ export interface ExecutionSuccessEnvelope {
     status: "success";
     durationMs: number;
     requestId?: string;
+    threadId?: string;
   };
 }
 
@@ -143,6 +144,7 @@ export function shapeSuccess(params: {
   agentId: string;
   durationMs: number;
   requestId?: string;
+  threadId?: string;
   outputMode?: "concise" | "full" | "chat";
 }): ExecutionSuccessEnvelope {
   return {
@@ -153,6 +155,7 @@ export function shapeSuccess(params: {
       status: "success",
       durationMs: Math.max(0, Math.round(params.durationMs)),
       requestId: params.requestId,
+      threadId: params.threadId,
     },
   };
 }

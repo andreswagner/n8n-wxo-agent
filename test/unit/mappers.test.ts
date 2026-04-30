@@ -45,6 +45,7 @@ describe("mappers", () => {
       raw: { output: "ok" },
       agentId: "agent-1",
       durationMs: 5,
+      threadId: "session-1",
       outputMode: "full",
     });
     const concise = shapeSuccess({
@@ -61,6 +62,7 @@ describe("mappers", () => {
     });
 
     expect(full.raw).toEqual({ output: "ok" });
+    expect(full.metadata.threadId).toBe("session-1");
     expect(concise.raw).toBeNull();
     expect(chat.raw).toBeNull();
   });

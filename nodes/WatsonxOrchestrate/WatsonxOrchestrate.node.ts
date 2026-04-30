@@ -27,6 +27,7 @@ export async function executeSingleItem(params: {
   const input = params.context.getNodeParameter("input", params.itemIndex, null) as unknown;
   const timeoutMs = params.context.getNodeParameter("timeoutMs", params.itemIndex, 30000) as number;
   const threadIdRaw = params.context.getNodeParameter("threadId", params.itemIndex, "") as string;
+  const effectiveThreadId = String(threadIdRaw ?? "").trim();
   const requestId = `wxo-${Date.now()}-${params.itemIndex}`;
   const started = Date.now();
 
@@ -36,7 +37,7 @@ export async function executeSingleItem(params: {
     normalized,
     timeoutMs,
     requestId,
-    threadId: threadIdRaw,
+    threadId: effectiveThreadId,
   });
 
   const raw = await transportClient.executeAgent(params.context, request);
@@ -47,6 +48,7 @@ export async function executeSingleItem(params: {
     agentId: params.resolvedAgentId,
     durationMs,
     requestId,
+    threadId: request.threadId,
     outputMode: params.outputMode,
   });
 
@@ -57,6 +59,8 @@ export async function executeSingleItem(params: {
       json: {
         response: chatResponse,
         text,
+        threadId: request.threadId ?? null,
+        requestId,
       } as IDataObject,
     };
   }
