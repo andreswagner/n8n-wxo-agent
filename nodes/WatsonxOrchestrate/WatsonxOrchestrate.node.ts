@@ -70,7 +70,7 @@ export class WatsonxOrchestrate implements INodeType {
   description: INodeTypeDescription = {
     displayName: "Watsonx Orchestrate",
     name: "watsonxOrchestrate",
-    icon: "file:watsonxOrchestrate.svg",
+    icon: "file:wxo.svg",
     group: ["transform"],
     version: [1],
     subtitle: '={{$parameter["operation"]}}',
