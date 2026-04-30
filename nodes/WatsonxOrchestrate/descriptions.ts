@@ -84,12 +84,12 @@ export const nodeProperties: INodeProperties[] = [
     },
   },
   {
-    displayName: "Thread ID",
-    name: "threadId",
+    displayName: "Session ID",
+    name: "sessionId",
     type: "string",
     default: "={{$json.sessionId || ''}}",
     description:
-      "Conversation/thread identifier sent as `X-IBM-THREAD-ID`. Defaults to incoming `sessionId` so n8n chat sessions map to watsonx Orchestrate threads.",
+      "Stable conversation key used for internal `sessionId -> thread_id` mapping. First message starts without thread header; later messages reuse the mapped provider thread via `X-IBM-THREAD-ID`.",
     displayOptions: {
       show: {
         operation: ["executeAgent"],

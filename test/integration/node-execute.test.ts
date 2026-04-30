@@ -11,7 +11,7 @@ function createContext(overrides?: Partial<Record<string, unknown>>) {
     agentIdFromList: "",
     input: { prompt: "hello" },
     timeoutMs: 30000,
-    threadId: "",
+    sessionId: "",
     outputMode: "full",
     ...(overrides ?? {}),
   };
@@ -54,15 +54,15 @@ describe("WatsonxOrchestrate.execute", () => {
     const node = new WatsonxOrchestrate();
 
     const result = await node.execute.call(
-      createContext({ outputMode: "chat", threadId: "session-42" }) as never,
+      createContext({ outputMode: "chat", sessionId: "session-42" }) as never,
     );
 
     expect(result[0]).toHaveLength(2);
     expect((result[0][0].json as any).response).toBe("hello from agent");
     expect((result[0][0].json as any).text).toBe("hello from agent");
     expect((result[0][0].json as any).threadId).toBe("thread-from-provider");
-    expect((result[0][0].json as any).sessionId).toBeNull();
-    expect((result[0][0].json as any).sentThreadId).toBe("session-42");
+    expect((result[0][0].json as any).sessionId).toBe("session-42");
+    expect((result[0][0].json as any).sentThreadId).toBeNull();
     expect((result[0][0].json as any).requestId).toMatch(/^wxo-/);
     expect((result[0][0].json as any).metadata).toBeUndefined();
   });
@@ -71,7 +71,7 @@ describe("WatsonxOrchestrate.execute", () => {
     const executeSpy = vi.spyOn(transportClient, "executeAgent")
       .mockResolvedValue({ output: "ok", thread_id: "provider-thread-1" } as IDataObject);
     const node = new WatsonxOrchestrate();
-    const context = createContext({ threadId: "", outputMode: "chat" }) as Record<string, unknown>;
+    const context = createContext({ sessionId: "", outputMode: "chat" }) as Record<string, unknown>;
     context.getInputData = () => [{ json: { sessionId: "session-from-item" } }];
 
     const result = await node.execute.call(context as never);
@@ -81,11 +81,11 @@ describe("WatsonxOrchestrate.execute", () => {
     expect(result[0][0].json.sessionId).toBe("session-from-item");
   });
 
-  it("uses input.thread_id when threadId param is empty", async () => {
+  it("ignores legacy input.thread_id and uses session mapping only", async () => {
     vi.spyOn(transportClient, "executeAgent").mockResolvedValue({ output: "ok" } as IDataObject);
     const node = new WatsonxOrchestrate();
     const context = createContext({
-      threadId: "",
+      sessionId: "",
       outputMode: "chat",
       input: { thread_id: "thread-from-input", prompt: "hi" },
     }) as Record<string, unknown>;
@@ -93,7 +93,8 @@ describe("WatsonxOrchestrate.execute", () => {
 
     const result = await node.execute.call(context as never);
 
-    expect(result[0][0].json.threadId).toBe("thread-from-input");
+    expect(result[0][0].json.threadId).toBeNull();
+    expect((result[0][0].json as any).sessionId).toBeNull();
   });
 
   it("uses mapped provider thread id for subsequent messages", async () => {
@@ -102,7 +103,7 @@ describe("WatsonxOrchestrate.execute", () => {
       .mockResolvedValueOnce({ output: "second", thread_id: "provider-thread-b" } as IDataObject);
 
     const node = new WatsonxOrchestrate();
-    const context = createContext({ threadId: "", outputMode: "chat" }) as Record<string, unknown>;
+    const context = createContext({ sessionId: "", outputMode: "chat" }) as Record<string, unknown>;
     context.getInputData = () => [
       { json: { sessionId: "stable-session" } },
       { json: { sessionId: "stable-session" } },

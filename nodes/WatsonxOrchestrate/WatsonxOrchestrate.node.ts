@@ -32,13 +32,11 @@ export async function executeSingleItem(params: {
 }): Promise<INodeExecutionData> {
   const input = params.context.getNodeParameter("input", params.itemIndex, null) as unknown;
   const timeoutMs = params.context.getNodeParameter("timeoutMs", params.itemIndex, 30000) as number;
-  const threadIdRaw = params.context.getNodeParameter("threadId", params.itemIndex, "") as string;
+  const sessionIdParam = params.context.getNodeParameter("sessionId", params.itemIndex, "") as string;
   const itemJson = (params.context.getInputData()[params.itemIndex]?.json ?? {}) as IDataObject;
-  const payloadThreadId = readInputThreadId(input);
-  const sessionIdFallback = String(itemJson.sessionId ?? "").trim();
-  const explicitThreadId = String(threadIdRaw ?? "").trim() || payloadThreadId;
+  const sessionIdFallback = String(sessionIdParam ?? "").trim() || String(itemJson.sessionId ?? "").trim();
   const mappedThreadId = sessionIdFallback ? sessionToThreadId.get(sessionIdFallback) : undefined;
-  const effectiveThreadId = explicitThreadId || mappedThreadId;
+  const effectiveThreadId = mappedThreadId;
   const requestId = `wxo-${Date.now()}-${params.itemIndex}`;
   const started = Date.now();
 
@@ -53,7 +51,7 @@ export async function executeSingleItem(params: {
 
   const raw = await transportClient.executeAgent(params.context, request);
   const responseThreadId = readResponseThreadId(raw) ?? request.threadId;
-  if (sessionIdFallback && responseThreadId && !sessionToThreadId.has(sessionIdFallback)) {
+  if (sessionIdFallback && responseThreadId) {
     sessionToThreadId.set(sessionIdFallback, responseThreadId);
   }
   const durationMs = Date.now() - started;
@@ -85,15 +83,6 @@ export async function executeSingleItem(params: {
   return {
     json: envelope as unknown as IDataObject,
   };
-}
-
-function readInputThreadId(input: unknown): string {
-  if (typeof input !== "object" || input === null || Array.isArray(input)) {
-    return "";
-  }
-  const obj = input as IDataObject;
-  const candidate = obj.thread_id ?? obj.threadId;
-  return typeof candidate === "string" ? candidate.trim() : "";
 }
 
 function readResponseThreadId(raw: unknown): string | undefined {
