@@ -30,7 +30,8 @@ export async function executeSingleItem(params: {
   const itemJson = (params.context.getInputData()[params.itemIndex]?.json ?? {}) as IDataObject;
   const payloadThreadId = readInputThreadId(input);
   const sessionIdFallback = String(itemJson.sessionId ?? "").trim();
-  const effectiveThreadId = String(threadIdRaw ?? "").trim() || payloadThreadId || sessionIdFallback;
+  const rawThreadId = String(threadIdRaw ?? "").trim() || payloadThreadId || sessionIdFallback;
+  const effectiveThreadId = normalizeThreadId(rawThreadId);
   const requestId = `wxo-${Date.now()}-${params.itemIndex}`;
   const started = Date.now();
 
@@ -96,6 +97,18 @@ function readResponseThreadId(raw: unknown): string | undefined {
   }
   const t = candidate.trim();
   return t.length > 0 ? t : undefined;
+}
+
+/**
+ * Watsonx thread IDs are usually UUIDs with dashes.
+ * n8n chat sessionId often arrives as 32-hex (UUID without dashes), so normalize it.
+ */
+function normalizeThreadId(value: string): string {
+  const t = value.trim();
+  const hex32 = /^[0-9a-fA-F]{32}$/;
+  if (!hex32.test(t)) return t;
+  const lower = t.toLowerCase();
+  return `${lower.slice(0, 8)}-${lower.slice(8, 12)}-${lower.slice(12, 16)}-${lower.slice(16, 20)}-${lower.slice(20)}`;
 }
 
 export class WatsonxOrchestrate implements INodeType {

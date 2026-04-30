@@ -113,6 +113,22 @@ describe("WatsonxOrchestrate.execute", () => {
     expect((result[0][1].json as any).sessionId).toBe("stable-session");
   });
 
+  it("normalizes 32-hex sessionId to dashed UUID thread_id", async () => {
+    const executeSpy = vi.spyOn(transportClient, "executeAgent")
+      .mockResolvedValue({ output: "ok" } as IDataObject);
+    const node = new WatsonxOrchestrate();
+    const context = createContext({ threadId: "", outputMode: "chat" }) as Record<string, unknown>;
+    context.getInputData = () => [{ json: { sessionId: "818ac1a720ca45d5abf6e5bde04641de" } }];
+
+    const result = await node.execute.call(context as never);
+    const expected = "818ac1a7-20ca-45d5-abf6-e5bde04641de";
+
+    expect(executeSpy).toHaveBeenCalledTimes(1);
+    expect(executeSpy.mock.calls[0][1].threadId).toBe(expected);
+    expect((result[0][0].json as any).sessionId).toBe(expected);
+    expect((result[0][0].json as any).sentThreadId).toBe(expected);
+  });
+
   it("supports manual fallback and unknown agent failures", async () => {
     vi.spyOn(transportClient, "executeAgent").mockRejectedValue(new Error("not found"));
     const node = new WatsonxOrchestrate();

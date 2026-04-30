@@ -25,7 +25,7 @@ describe("transport thread header", () => {
     expect(requestOptions.headers).toMatchObject({
       "x-request-id": "req-1",
       "X-IBM-THREAD-ID": "session-123",
-      "X-THREAD-ID": "session-123",
     });
+    expect(requestOptions.headers["X-THREAD-ID"]).toBeUndefined();
   });
 });
