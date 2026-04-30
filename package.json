@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-watsonx-orchestrate",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "n8n community node for IBM Watsonx Orchestrate agent execution.",
   "license": "MIT",
   "type": "commonjs",
