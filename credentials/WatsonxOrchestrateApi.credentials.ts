@@ -68,7 +68,7 @@ export class WatsonxOrchestrateApi implements ICredentialType {
   test: ICredentialTestRequest = {
     request: {
       method: "GET",
-      url: "={{$credentials.baseUrl.replace(/\/+$/, \"\")}}/v1/orchestrate/agents",
+      url: "={{$credentials.baseUrl}}/v1/orchestrate/agents",
     },
   };
 }
