@@ -6,7 +6,10 @@ export const nodeProperties: INodeProperties[] = [
     name: "operation",
     type: "options",
     default: "executeAgent",
-    options: [{ name: "Execute Agent", value: "executeAgent" }],
+    options: [
+      { name: "Execute Agent", value: "executeAgent" },
+      { name: "Debug Authentication", value: "debugAuthentication" },
+    ],
   },
   {
     displayName: "Selection Mode",
@@ -18,6 +21,11 @@ export const nodeProperties: INodeProperties[] = [
       { name: "List", value: "list" },
       { name: "Manual", value: "manual" },
     ],
+    displayOptions: {
+      show: {
+        operation: ["executeAgent"],
+      },
+    },
   },
   {
     displayName: "Agent",
@@ -30,6 +38,7 @@ export const nodeProperties: INodeProperties[] = [
     },
     displayOptions: {
       show: {
+        operation: ["executeAgent"],
         agentSelectionMode: ["list"],
       },
     },
@@ -43,6 +52,7 @@ export const nodeProperties: INodeProperties[] = [
     required: true,
     displayOptions: {
       show: {
+        operation: ["executeAgent"],
         agentSelectionMode: ["manual"],
       },
     },
@@ -55,6 +65,11 @@ export const nodeProperties: INodeProperties[] = [
     default: "={{ { \"prompt\": \"Hello\" } }}",
     required: true,
     description: "Execution payload. Supports text, numbers, booleans, arrays, objects, and null",
+    displayOptions: {
+      show: {
+        operation: ["executeAgent"],
+      },
+    },
   },
   {
     displayName: "Timeout (ms)",
@@ -62,6 +77,11 @@ export const nodeProperties: INodeProperties[] = [
     type: "number",
     default: 30000,
     description: "Per-item request timeout (1000-120000)",
+    displayOptions: {
+      show: {
+        operation: ["executeAgent"],
+      },
+    },
   },
   {
     displayName: "Output Mode",
@@ -73,5 +93,10 @@ export const nodeProperties: INodeProperties[] = [
       { name: "Concise (response only)", value: "concise" },
     ],
     description: "Choose whether to include full raw upstream payload",
+    displayOptions: {
+      show: {
+        operation: ["executeAgent"],
+      },
+    },
   },
 ];

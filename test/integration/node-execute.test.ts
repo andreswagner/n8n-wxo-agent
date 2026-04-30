@@ -98,4 +98,20 @@ describe("WatsonxOrchestrate.execute", () => {
 
     expect(options).toHaveLength(2);
   });
+
+  it("returns UI-friendly diagnostics in debugAuthentication operation", async () => {
+    vi.spyOn(transportClient, "debugAuthentication").mockResolvedValue({
+      operation: "debugAuthentication",
+      ok: false,
+      auth: { authorizationMasked: "Bearer abc...xyz" },
+      http: { statusCode: 401 },
+    } as IDataObject);
+
+    const node = new WatsonxOrchestrate();
+    const result = await node.execute.call(createContext({ operation: "debugAuthentication" }) as never);
+
+    expect(result[0]).toHaveLength(2);
+    expect((result[0][0].json as IDataObject).operation).toBe("debugAuthentication");
+    expect((result[0][0].json as IDataObject).http).toEqual({ statusCode: 401 });
+  });
 });

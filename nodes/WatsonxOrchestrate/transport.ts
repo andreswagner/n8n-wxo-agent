@@ -1,10 +1,12 @@
 import type { IDataObject, IExecuteFunctions, ILoadOptionsFunctions, INodePropertyOptions } from "n8n-workflow";
 import { buildStructuredError, classifyProviderError, sanitizeDetails, type StructuredExecutionError } from "./errors";
 import type { ExecutionRequest } from "./mappers";
+import { exchangeApiKeyForIamAccessToken, isLikelyIamAccessToken, normalizeTokenSecret } from "../../credentials/ibm-iam";
 
 export interface TransportClient {
   executeAgent(ctx: IExecuteFunctions, request: ExecutionRequest): Promise<IDataObject>;
   listAgents(ctx: ILoadOptionsFunctions): Promise<INodePropertyOptions[]>;
+  debugAuthentication(ctx: IExecuteFunctions): Promise<IDataObject>;
 }
 
 /**
@@ -112,6 +114,104 @@ export const transportClient: TransportClient = {
       return [];
     }
   },
+
+  async debugAuthentication(ctx) {
+    const diagnostics: IDataObject = {
+      operation: "debugAuthentication",
+      ok: false,
+    };
+
+    try {
+      const credentials = await ctx.getCredentials("watsonxOrchestrateApi");
+      const baseUrl = String(credentials.baseUrl ?? "");
+      const source = normalizeTokenSecret(credentials.token);
+      const inputKind = isLikelyIamAccessToken(source) ? "access_token_jwt" : "api_key_or_unknown";
+
+      diagnostics.auth = {
+        inputKind,
+        inputMasked: maskSecret(source),
+      };
+      diagnostics.request = {
+        method: "GET",
+        url: joinPath(baseUrl, listAgentsPath()),
+      };
+
+      let resolvedAccessToken = source;
+      if (!isLikelyIamAccessToken(source)) {
+        try {
+          resolvedAccessToken = await exchangeApiKeyForIamAccessToken(ctx.helpers.httpRequest, source);
+          diagnostics.iamExchange = {
+            ok: true,
+          };
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          diagnostics.iamExchange = {
+            ok: false,
+            message,
+          };
+          diagnostics.error = sanitizeDetails({ message });
+          return diagnostics;
+        }
+      } else {
+        diagnostics.iamExchange = {
+          ok: true,
+          skipped: true,
+          reason: "Token input already looks like an IAM JWT access token",
+        };
+      }
+
+      const authorization = `Bearer ${resolvedAccessToken}`;
+      diagnostics.auth = {
+        ...(diagnostics.auth as IDataObject),
+        resolvedKind: isLikelyIamAccessToken(resolvedAccessToken) ? "access_token_jwt" : "non_jwt",
+        resolvedMasked: maskSecret(resolvedAccessToken),
+        authorizationMasked: `Bearer ${maskSecret(resolvedAccessToken)}`,
+        authorizationLength: authorization.length,
+      };
+
+      const response = await ctx.helpers.httpRequest({
+        method: "GET",
+        url: joinPath(baseUrl, listAgentsPath()),
+        headers: {
+          Authorization: authorization,
+        },
+        json: true,
+        ignoreHttpStatusErrors: true,
+        returnFullResponse: true,
+      });
+
+      const full = response as IDataObject;
+      const statusCode = Number(full.statusCode ?? 0);
+      const responseBody = full.body as IDataObject | unknown;
+      const responseHeaders = (full.headers ?? {}) as IDataObject;
+
+      diagnostics.http = {
+        statusCode,
+        ok: statusCode >= 200 && statusCode < 300,
+        bodyPreview: previewJson(responseBody),
+        headers: {
+          "www-authenticate": responseHeaders["www-authenticate"],
+          "x-request-id": responseHeaders["x-request-id"],
+          date: responseHeaders.date,
+        },
+      };
+      diagnostics.ok = statusCode >= 200 && statusCode < 300;
+
+      if (!diagnostics.ok) {
+        const classified = classifyProviderError({
+          statusCode,
+          message: typeof responseBody === "object" ? JSON.stringify(responseBody) : String(responseBody ?? ""),
+        });
+        diagnostics.classification = classified;
+      }
+
+      return diagnostics;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      diagnostics.error = sanitizeDetails({ message });
+      return diagnostics;
+    }
+  },
 };
 
 export function toStructuredProviderError(error: IDataObject, agentId?: string, requestId?: string): StructuredExecutionError {
@@ -125,4 +225,21 @@ export function toStructuredProviderError(error: IDataObject, agentId?: string, 
     agentId,
     requestId,
   });
+}
+
+function maskSecret(secret: string): string {
+  const value = String(secret ?? "").trim();
+  if (!value) return "<empty>";
+  if (value.length <= 12) {
+    return `${value.slice(0, 1)}***${value.slice(-1)}`;
+  }
+  return `${value.slice(0, 8)}...${value.slice(-8)}`;
+}
+
+function previewJson(value: unknown): string {
+  try {
+    return JSON.stringify(value).slice(0, 1200);
+  } catch {
+    return String(value).slice(0, 1200);
+  }
 }

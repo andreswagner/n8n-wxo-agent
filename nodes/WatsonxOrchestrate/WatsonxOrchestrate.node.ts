@@ -88,6 +88,15 @@ export class WatsonxOrchestrate implements INodeType {
     const items = this.getInputData();
     const operation = this.getNodeParameter("operation", 0, "executeAgent") as string;
 
+    if (operation === "debugAuthentication") {
+      const returnData: INodeExecutionData[] = [];
+      for (let itemIndex = 0; itemIndex < items.length; itemIndex += 1) {
+        const debug = await transportClient.debugAuthentication(this);
+        returnData.push({ json: debug });
+      }
+      return [returnData];
+    }
+
     if (operation !== "executeAgent") {
       throw new NodeOperationError(this.getNode(), `Unsupported operation: ${operation}`);
     }
