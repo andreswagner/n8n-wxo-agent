@@ -2,6 +2,8 @@
 
 Custom n8n community node for executing IBM Watsonx Orchestrate agents from workflows with a deterministic output envelope.
 
+**Requirements:** n8n **2.x** (self-hosted or Cloud where community nodes are supported). Not compatible with n8n 1.x.
+
 ## Features
 
 - Secure credentials with n8n credential store (`token`, `baseUrl`, `environment`)
@@ -24,6 +26,22 @@ Failed items with continue-on-fail enabled return:
 - `message`, `retryable`, `details`, `metadata`
 - `pairedItem` linking output item to the source item index
 
+## Authentication (IBM Cloud)
+
+watsonx Orchestrate on **IBM Cloud** can be authorized with an **IAM API key** or an **IAM access token** (see IBM: *Generating the access token for the IBM Cloud offering*). This node sends `Authorization: Bearer <credential Token>`.
+
+- **Recommended for this credential:** store the **`access_token`** from IAM (a JWT), not the API key string. Obtain it by exchanging your API key:
+
+```bash
+curl -X POST 'https://iam.cloud.ibm.com/identity/token' \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -d 'grant_type=urn:ibm:params:oauth:grant-type:apikey&apikey=YOUR_APIKEY'
+```
+
+Copy `access_token` from the JSON into the credential **Token** field (no `Bearer ` prefix). Refresh when the token expires.
+
+- **`npm run test:live`** uses `.env` **`WXO_API_KEY`** and performs this exchange automatically before calling the Orchestrate API (see `test/live/ibm-iam-exchange.ts`).
+
 ## Quick Usage
 
 1. Configure `Watsonx Orchestrate API` credentials.
@@ -37,3 +55,15 @@ Failed items with continue-on-fail enabled return:
 - Build: `npm run build`
 - Test: `npm run test`
 - Package check: `npm pack --dry-run`
+
+### Live API verification (real credentials)
+
+Use this when n8n shows **“Couldn’t connect with these settings”** and you want to hit the same endpoint as the credential test, outside n8n.
+
+1. Copy `.env.example` to `.env` (`.env` is gitignored).
+2. Set **`WXO_BASE_URL`** (Orchestrate API host) and **`WXO_API_KEY`** (IBM Cloud API key). Nothing else is required in `.env`.
+3. Run **`npm run test:live`**.
+
+The script exchanges the API key at IBM IAM, then calls `GET {WXO_BASE_URL}{WXO_LIVE_PATH}` (default **`WXO_LIVE_PATH=/v1/orchestrate/agents`**) with `Authorization: Bearer <access_token>`, matching the credential **Test** and the same routes as [`@andreswagner/node-red-contrib-wxo-agent`](https://www.npmjs.com/package/@andreswagner/node-red-contrib-wxo-agent). **`WXO_BASE_URL`** must be the **Service instance URL** (`https://<host>/instances/<tenant_id>`). **`npm test`** does not use `.env` for network calls (live tests are excluded).
+
+For **n8n**, put the IAM **`access_token`** from the curl exchange (or equivalent) into the **Token** field unless you rely on another documented Bearer format. This package does not run the IAM exchange inside n8n yet; `npm run test:live` does it only for local CLI checks.

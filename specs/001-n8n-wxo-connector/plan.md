@@ -10,7 +10,7 @@ Build a production-ready custom n8n connector node that authenticates against IB
 ## Technical Context
 
 **Language/Version**: TypeScript 5.x on Node.js 20 LTS  
-**Primary Dependencies**: `n8n-workflow`, `n8n-core`, `@n8n/node-cli`/n8n node tooling, built-in `this.helpers.httpRequestWithAuthentication` for transport  
+**Primary Dependencies**: `n8n-workflow` ^2.x (peer at runtime from n8n 2.x host), TypeScript, Vitest; optional `@n8n/node-cli` for scaffolding; built-in `helpers.httpRequestWithAuthentication` for transport  
 **Storage**: N/A (stateless runtime; secrets only in n8n credential store)  
 **Testing**: Vitest (unit), n8n execution harness + mocked HTTP for integration  
 **Target Platform**: n8n self-hosted and n8n-compatible runtime on Linux/macOS containers  

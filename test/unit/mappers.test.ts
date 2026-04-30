@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { buildExecutionRequest, normalizeInput, shapeSuccess } from "../../nodes/WatsonxOrchestrate/mappers";
+import {
+  buildExecutionRequest,
+  normalizeInput,
+  pickResponse,
+  shapeSuccess,
+} from "../../nodes/WatsonxOrchestrate/mappers";
 
 describe("mappers", () => {
   it("normalizes primitive and object inputs", () => {
@@ -25,6 +30,14 @@ describe("mappers", () => {
       requestId: "req-1",
     });
     expect(request.payload.inputType).toBe("object");
+  });
+
+  it("picks assistant content from chat completion choices", () => {
+    expect(
+      pickResponse({
+        choices: [{ message: { role: "assistant", content: "hello" } }],
+      }),
+    ).toBe("hello");
   });
 
   it("supports output shaping mode", () => {

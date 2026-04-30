@@ -8,7 +8,9 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:live": "vitest run --config vitest.live.config.ts",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "n8n-community-node-package",
@@ -29,6 +31,7 @@
   },
   "n8n": {
     "n8nNodesApiVersion": 1,
+    "strict": true,
     "credentials": [
       "dist/credentials/WatsonxOrchestrateApi.credentials.js"
     ],
@@ -38,11 +41,12 @@
   },
   "devDependencies": {
     "@types/node": "^22.15.0",
+    "dotenv": "^16.5.0",
+    "n8n-workflow": "^2.16.0",
     "typescript": "^5.8.3",
     "vitest": "^3.1.1"
   },
-  "dependencies": {
-    "n8n-core": "^1.93.0",
-    "n8n-workflow": "^1.93.0"
+  "peerDependencies": {
+    "n8n-workflow": "^2.16.0"
   }
 }

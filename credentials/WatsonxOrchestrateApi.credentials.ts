@@ -19,8 +19,11 @@ export class WatsonxOrchestrateApi implements ICredentialType {
       type: "string",
       default: "",
       required: true,
-      placeholder: "https://api.example.watson-orchestrate.ibm.com",
-      description: "Base URL for the Watsonx Orchestrate API",
+      placeholder: "https://api.REGION.watson-orchestrate.ibm.com/instances/TENANT_ID",
+      description:
+        "IBM **Service instance URL** from watsonx Orchestrate → Profile → Settings → API details. "
+        + "Format: `https://<hostname>/instances/<tenant_id>` (IBM Cloud / AWS). "
+        + "The node calls `/v1/orchestrate/agents` and `/v1/orchestrate/{agent}/chat/completions` on that URL (same as `@andreswagner/node-red-contrib-wxo-agent`).",
     },
     {
       displayName: "Token",
@@ -31,7 +34,14 @@ export class WatsonxOrchestrateApi implements ICredentialType {
       },
       default: "",
       required: true,
-      description: "Bearer token or API key",
+      description:
+        "IBM Cloud IAM **access token** (recommended): paste the `access_token` value only—no `Bearer ` prefix. "
+        + "IBM documents that watsonx Orchestrate on IBM Cloud accepts an IAM API key or an IAM access token; "
+        + "this field must be whatever you send after `Bearer ` (most teams use the access token from IAM). "
+        + "To create a token from an API key, call IAM Identity Services: POST `https://iam.cloud.ibm.com/identity/token` "
+        + "with `Content-Type: application/x-www-form-urlencoded` and body "
+        + "`grant_type=urn:ibm:params:oauth:grant-type:apikey&apikey=YOUR_APIKEY`, then paste the JSON `access_token`. "
+        + "Tokens expire (often ~1 hour); refresh by repeating the exchange or use `ibmcloud iam oauth-tokens` after login.",
     },
     {
       displayName: "Environment",
@@ -58,7 +68,7 @@ export class WatsonxOrchestrateApi implements ICredentialType {
   test: ICredentialTestRequest = {
     request: {
       method: "GET",
-      url: "/v1/agents",
+      url: "/v1/orchestrate/agents",
     },
   };
 }

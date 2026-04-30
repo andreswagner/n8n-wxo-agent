@@ -121,6 +121,17 @@ export function pickResponse(raw: unknown): unknown {
   }
 
   const payload = raw as IDataObject;
+  const choices = payload.choices as IDataObject[] | undefined;
+  if (Array.isArray(choices) && choices.length > 0) {
+    const first = choices[0] as IDataObject;
+    const message = first.message as IDataObject | undefined;
+    if (message?.content !== undefined && message.content !== null) {
+      return message.content;
+    }
+    if (first.text !== undefined) {
+      return first.text;
+    }
+  }
   return payload.output ?? payload.result ?? payload.response ?? raw;
 }
 
