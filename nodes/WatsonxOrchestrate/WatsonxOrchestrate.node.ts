@@ -64,7 +64,8 @@ export async function executeSingleItem(params: {
         response: chatResponse,
         text,
         threadId: responseThreadId ?? null,
-        sessionId: responseThreadId ?? null,
+        sessionId: request.threadId ?? null,
+        sentThreadId: request.threadId ?? null,
         requestId,
       } as IDataObject,
     };

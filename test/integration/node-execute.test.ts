@@ -60,7 +60,8 @@ describe("WatsonxOrchestrate.execute", () => {
     expect((result[0][0].json as any).response).toBe("hello from agent");
     expect((result[0][0].json as any).text).toBe("hello from agent");
     expect((result[0][0].json as any).threadId).toBe("thread-from-provider");
-    expect((result[0][0].json as any).sessionId).toBe("thread-from-provider");
+    expect((result[0][0].json as any).sessionId).toBe("session-42");
+    expect((result[0][0].json as any).sentThreadId).toBe("session-42");
     expect((result[0][0].json as any).requestId).toMatch(/^wxo-/);
     expect((result[0][0].json as any).metadata).toBeUndefined();
   });
@@ -89,6 +90,27 @@ describe("WatsonxOrchestrate.execute", () => {
     const result = await node.execute.call(context as never);
 
     expect(result[0][0].json.threadId).toBe("thread-from-input");
+  });
+
+  it("keeps outgoing thread id stable across turns for same sessionId", async () => {
+    const executeSpy = vi.spyOn(transportClient, "executeAgent")
+      .mockResolvedValueOnce({ output: "first", thread_id: "provider-thread-a" } as IDataObject)
+      .mockResolvedValueOnce({ output: "second", thread_id: "provider-thread-b" } as IDataObject);
+
+    const node = new WatsonxOrchestrate();
+    const context = createContext({ threadId: "", outputMode: "chat" }) as Record<string, unknown>;
+    context.getInputData = () => [
+      { json: { sessionId: "stable-session" } },
+      { json: { sessionId: "stable-session" } },
+    ];
+
+    const result = await node.execute.call(context as never);
+
+    expect(executeSpy).toHaveBeenCalledTimes(2);
+    expect(executeSpy.mock.calls[0][1].threadId).toBe("stable-session");
+    expect(executeSpy.mock.calls[1][1].threadId).toBe("stable-session");
+    expect((result[0][0].json as any).sessionId).toBe("stable-session");
+    expect((result[0][1].json as any).sessionId).toBe("stable-session");
   });
 
   it("supports manual fallback and unknown agent failures", async () => {
