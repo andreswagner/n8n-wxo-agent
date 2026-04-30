@@ -46,7 +46,10 @@ describe("WatsonxOrchestrate.execute", () => {
   });
 
   it("returns chat-friendly payload in chat output mode", async () => {
-    vi.spyOn(transportClient, "executeAgent").mockResolvedValue({ output: "hello from agent" } as IDataObject);
+    vi.spyOn(transportClient, "executeAgent").mockResolvedValue({
+      output: "hello from agent",
+      thread_id: "thread-from-provider",
+    } as IDataObject);
     const node = new WatsonxOrchestrate();
 
     const result = await node.execute.call(
@@ -56,7 +59,8 @@ describe("WatsonxOrchestrate.execute", () => {
     expect(result[0]).toHaveLength(2);
     expect((result[0][0].json as any).response).toBe("hello from agent");
     expect((result[0][0].json as any).text).toBe("hello from agent");
-    expect((result[0][0].json as any).threadId).toBe("session-42");
+    expect((result[0][0].json as any).threadId).toBe("thread-from-provider");
+    expect((result[0][0].json as any).sessionId).toBe("thread-from-provider");
     expect((result[0][0].json as any).requestId).toMatch(/^wxo-/);
     expect((result[0][0].json as any).metadata).toBeUndefined();
   });
@@ -70,6 +74,21 @@ describe("WatsonxOrchestrate.execute", () => {
     const result = await node.execute.call(context as never);
 
     expect(result[0][0].json.threadId).toBe("session-from-item");
+  });
+
+  it("uses input.thread_id when threadId param is empty", async () => {
+    vi.spyOn(transportClient, "executeAgent").mockResolvedValue({ output: "ok" } as IDataObject);
+    const node = new WatsonxOrchestrate();
+    const context = createContext({
+      threadId: "",
+      outputMode: "chat",
+      input: { thread_id: "thread-from-input", prompt: "hi" },
+    }) as Record<string, unknown>;
+    context.getInputData = () => [{ json: {} }];
+
+    const result = await node.execute.call(context as never);
+
+    expect(result[0][0].json.threadId).toBe("thread-from-input");
   });
 
   it("supports manual fallback and unknown agent failures", async () => {

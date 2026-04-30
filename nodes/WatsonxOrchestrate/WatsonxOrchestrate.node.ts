@@ -28,8 +28,9 @@ export async function executeSingleItem(params: {
   const timeoutMs = params.context.getNodeParameter("timeoutMs", params.itemIndex, 30000) as number;
   const threadIdRaw = params.context.getNodeParameter("threadId", params.itemIndex, "") as string;
   const itemJson = (params.context.getInputData()[params.itemIndex]?.json ?? {}) as IDataObject;
+  const payloadThreadId = readInputThreadId(input);
   const sessionIdFallback = String(itemJson.sessionId ?? "").trim();
-  const effectiveThreadId = String(threadIdRaw ?? "").trim() || sessionIdFallback;
+  const effectiveThreadId = String(threadIdRaw ?? "").trim() || payloadThreadId || sessionIdFallback;
   const requestId = `wxo-${Date.now()}-${params.itemIndex}`;
   const started = Date.now();
 
@@ -43,6 +44,7 @@ export async function executeSingleItem(params: {
   });
 
   const raw = await transportClient.executeAgent(params.context, request);
+  const responseThreadId = readResponseThreadId(raw) ?? request.threadId;
   const durationMs = Date.now() - started;
 
   const envelope = shapeSuccess({
@@ -50,7 +52,7 @@ export async function executeSingleItem(params: {
     agentId: params.resolvedAgentId,
     durationMs,
     requestId,
-    threadId: request.threadId,
+    threadId: responseThreadId,
     outputMode: params.outputMode,
   });
 
@@ -61,7 +63,8 @@ export async function executeSingleItem(params: {
       json: {
         response: chatResponse,
         text,
-        threadId: request.threadId ?? null,
+        threadId: responseThreadId ?? null,
+        sessionId: responseThreadId ?? null,
         requestId,
       } as IDataObject,
     };
@@ -70,6 +73,28 @@ export async function executeSingleItem(params: {
   return {
     json: envelope as unknown as IDataObject,
   };
+}
+
+function readInputThreadId(input: unknown): string {
+  if (typeof input !== "object" || input === null || Array.isArray(input)) {
+    return "";
+  }
+  const obj = input as IDataObject;
+  const candidate = obj.thread_id ?? obj.threadId;
+  return typeof candidate === "string" ? candidate.trim() : "";
+}
+
+function readResponseThreadId(raw: unknown): string | undefined {
+  if (typeof raw !== "object" || raw === null || Array.isArray(raw)) {
+    return undefined;
+  }
+  const payload = raw as IDataObject;
+  const candidate = payload.thread_id ?? payload.threadId;
+  if (typeof candidate !== "string") {
+    return undefined;
+  }
+  const t = candidate.trim();
+  return t.length > 0 ? t : undefined;
 }
 
 export class WatsonxOrchestrate implements INodeType {
