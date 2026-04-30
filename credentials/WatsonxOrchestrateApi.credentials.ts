@@ -55,6 +55,9 @@ export class WatsonxOrchestrateApi implements ICredentialType {
       name: "resolvedAccessToken",
       type: "hidden",
       default: "",
+      typeOptions: {
+        expirable: true,
+      },
     },
     {
       displayName: "Environment",

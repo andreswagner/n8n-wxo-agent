@@ -56,4 +56,12 @@ describe("WatsonxOrchestrateApi preAuthentication", () => {
       },
     });
   });
+
+  it("marks resolved access token as expirable for n8n pre-auth refresh", () => {
+    const credential = new WatsonxOrchestrateApi();
+    const resolved = credential.properties.find((p) => p.name === "resolvedAccessToken");
+    expect(resolved).toBeDefined();
+    expect(resolved?.type).toBe("hidden");
+    expect(resolved?.typeOptions).toMatchObject({ expirable: true });
+  });
 });
